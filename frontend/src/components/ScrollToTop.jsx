@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 
 function scrollToTop() {
@@ -17,43 +17,56 @@ function scrollToTop() {
 
 export default function ScrollToTop() {
   const { pathname } = useLocation();
-  const prevPathname = useRef(null);
+  const userInteractedRef = useRef(false);
 
-  useLayoutEffect(() => {
+  // Reset interaction flag and scroll to top on route change or refresh
+  useEffect(() => {
+    userInteractedRef.current = false;
+    
     // Disable browser scroll restoration so refresh always lands at top
     if ('scrollRestoration' in window.history) {
       window.history.scrollRestoration = 'manual';
     }
 
-    // Scroll to top immediately on mount (before paint)
     scrollToTop();
-    
-    // Fallback for slower-loading layout shifts
-    const t1 = setTimeout(scrollToTop, 50);
-    const t2 = setTimeout(scrollToTop, 150);
 
-    // Trick the browser into saving Y=0 as the scroll position before reload
+    // Set up a sequence of timeouts to combat lazy-loading and layout shifts
+    const timeouts = [50, 100, 200, 400, 800, 1500].map(delay => 
+      setTimeout(() => {
+        if (!userInteractedRef.current) {
+          scrollToTop();
+        }
+      }, delay)
+    );
+
+    // Listen for manual user scroll/interaction to stop overriding their scroll position
+    const handleUserInteraction = () => {
+      userInteractedRef.current = true;
+    };
+
+    const eventOptions = { passive: true };
+    window.addEventListener('wheel', handleUserInteraction, eventOptions);
+    window.addEventListener('touchmove', handleUserInteraction, eventOptions);
+    window.addEventListener('keydown', handleUserInteraction, eventOptions);
+
+    return () => {
+      timeouts.forEach(clearTimeout);
+      window.removeEventListener('wheel', handleUserInteraction);
+      window.removeEventListener('touchmove', handleUserInteraction);
+      window.removeEventListener('keydown', handleUserInteraction);
+    };
+  }, [pathname]);
+
+  // Trick the browser into saving Y=0 as the scroll position before reload
+  useEffect(() => {
     const handleBeforeUnload = () => {
       window.scrollTo(0, 0);
     };
     window.addEventListener('beforeunload', handleBeforeUnload);
-
     return () => {
-      clearTimeout(t1);
-      clearTimeout(t2);
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
   }, []);
-
-  useEffect(() => {
-    // Scroll to top on every route change
-    if (prevPathname.current !== null && prevPathname.current !== pathname) {
-      scrollToTop();
-      const t = setTimeout(scrollToTop, 100);
-      return () => clearTimeout(t);
-    }
-    prevPathname.current = pathname;
-  }, [pathname]);
 
   return null;
 }
