@@ -101,9 +101,9 @@ export default function HealthIntelligencePanel({
 
       {/* AQI band pill */}
       <div>
-        <div className="hip-aqi-pill" aria-label={`AQI ${aqi} — ${insight.band}`}>
+        <div className="hip-aqi-pill" aria-label={`AQI ${aqi} — ${insight.band.label}`}>
           <span className="hip-aqi-dot" aria-hidden="true" />
-          AQI {aqi} · {insight.band}
+          AQI {aqi} · {insight.band.label}
         </div>
       </div>
 
