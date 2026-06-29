@@ -87,13 +87,21 @@ async def lifespan(app: FastAPI):
     _audit_environment()          # ← Logs env var status
     await init_db_clients()       # Open persistent HTTP pools on startup
     
-    # Warm-up the database connection
-    try:
-        from app.database import supabase_request
-        await supabase_request("health_data", "GET", query_params={"limit": "1"})
-        logger.info("Database connection warmed up successfully.")
-    except Exception as e:
-        logger.warning(f"Database warm-up failed (ignorable on cold start): {e}")
+    # Warm-up the database connection with retries (helps with network/DNS startup lag or paused DBs)
+    import asyncio
+    max_retries = 3
+    for attempt in range(1, max_retries + 1):
+        try:
+            from app.database import supabase_request
+            await supabase_request("health_data", "GET", query_params={"limit": "1"})
+            logger.info("Database connection warmed up successfully.")
+            break
+        except Exception as e:
+            if attempt == max_retries:
+                logger.warning(f"Database warm-up failed after {max_retries} attempts (ignorable on cold start): {e}")
+            else:
+                logger.info(f"Database warm-up attempt {attempt} failed ({e}). Retrying in 3s...")
+                await asyncio.sleep(3)
         
     yield
     await close_db_clients()      # Gracefully drain pools on shutdown
