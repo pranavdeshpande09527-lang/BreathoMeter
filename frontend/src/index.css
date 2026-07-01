@@ -4,7 +4,7 @@
    ========================================= */
 
 /* --- Google Font Import --- */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Poppins:wght@500;600;700&display=swap');
 /* --- Leaflet CSS --- */
 @import "leaflet/dist/leaflet.css";
 
@@ -88,7 +88,7 @@
 
   /* Typography */
   --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-heading: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-heading: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 
   /* Transitions (Unified Motion Language) */
   --transition-fast:    all 0.16s cubic-bezier(0.4, 0, 0.2, 1);
@@ -3590,24 +3590,28 @@ body[data-risk-context="high"] .card:not(:hover) {
   line-height: 1.15;
   letter-spacing: -1.5px;
   margin-bottom: 24px;
-  background: linear-gradient(135deg, #fff 0%, #a1a1aa 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: #EAEAEA;
+  -webkit-text-fill-color: #EAEAEA;
 }
 
 [data-theme='light'] .lp-hero .lp-hero-title {
-  background: linear-gradient(135deg, #0f172a 0%, #334155 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: #1A2D4A;
+  -webkit-text-fill-color: #1A2D4A;
 }
 
 /* ── 2b. ITALIC ACCENT LINE — tighter width ─────────────────────── */
 .lp-hero .lp-hero-accent {
   font-size: inherit;
   font-style: normal;
-  color: var(--color-primary);
-  -webkit-text-fill-color: var(--color-primary);
-  text-shadow: 0 0 24px rgba(37,99,235,0.4);
+  color: #00C4CC;
+  -webkit-text-fill-color: #00C4CC;
+  text-shadow: 0 0 24px rgba(0,196,204,0.35);
+}
+
+[data-theme='light'] .lp-hero .lp-hero-accent {
+  color: #007A9A;
+  -webkit-text-fill-color: #007A9A;
+  text-shadow: 0 0 24px rgba(0,122,154,0.25);
 }
 
 /* ── 4. NAVBAR — reduced vertical footprint ─────────────────────── */
@@ -3656,8 +3660,8 @@ body[data-risk-context="high"] .card:not(:hover) {
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 16px;
   background: rgba(15, 23, 42, 0.45);
-  backdrop-filter: blur(32px);
   -webkit-backdrop-filter: blur(32px);
+  backdrop-filter: blur(32px);
 }
 
 [data-theme='light'] .lp-monitor-panel {
@@ -3772,7 +3776,7 @@ body[data-risk-context="high"] .card:not(:hover) {
   }
 }
 @media (max-width: 768px) {
-  .lp-hero { min-height: auto; max-height: none; padding-block: 48px; }
+  .lp-hero { min-height: 0; max-height: none; padding-block: 48px; }
   .lp-nav { height: 60px; }
   .lp-nav-inner { height: 60px; }
   .lp-hero .lp-hero-title { font-size: clamp(2.4rem, 8vw, 3rem); }
@@ -3918,7 +3922,7 @@ body[data-risk-context="high"] .card:not(:hover) {
   opacity: 1;
 }
 [data-theme='light'] .lp-hero-sub {
-  color: #4A5568;
+  color: #5A677D;
 }
 
 /* ── Section sub: same fix ────────────────────────────────── */
@@ -4060,6 +4064,7 @@ body[data-risk-context="high"] .card:not(:hover) {
 /* Usage: add .data-masked class to any sensitive field container  */
 .data-masked {
   position: relative;
+  -webkit-user-select: none;
   user-select: none;
 }
 .data-masked .data-masked-value {
@@ -4161,7 +4166,6 @@ body[data-risk-context="high"] .card:not(:hover) {
 @media (max-width: 768px) {
   .chart-container {
     overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
   }
   .chart-tooltip {
     font-size: 0.625rem;
@@ -4407,14 +4411,26 @@ main[id="main-content"] {
     border: 2px solid ButtonText;
     color: ButtonText;
     background: ButtonFace;
-    forced-color-adjust: none;
   }
 
   /* Status badges must remain legible */
   .badge,
   .aqig-badge {
     border: 1px solid CanvasText;
-    forced-color-adjust: none;
+  }
+
+  @supports (forced-color-adjust: none) {
+    .btn,
+    .tb-icon-btn,
+    .lp-cta-primary,
+    .lp-cta-secondary {
+      forced-color-adjust: none;
+    }
+
+    .badge,
+    .aqig-badge {
+      forced-color-adjust: none;
+    }
   }
 
   /* Focus ring in high contrast — system color */
@@ -4468,9 +4484,9 @@ main[id="main-content"] {
   color: #94A3B8;    /* slate-400: 5.1:1 on #0D1B2E */
 }
 
-/* Hero sub on dark — #CBD5E1 = 6.2:1 on #0B1120 ✅ */
+/* Hero sub on dark — #9FA9B7 meets 4.5:1 on dark landing bg */
 .lp-hero-sub {
-  color: #CBD5E1;
+  color: #9FA9B7;
 }
 
 /* Module description text */
@@ -4799,7 +4815,6 @@ body {
   .chart-container,
   [class*="chart-wrap"] {
     overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
   }
 
   /* AQI gauge cards: full-width stack */
@@ -5154,7 +5169,6 @@ html, body {
   transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
   overflow-y: auto;
   overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
   width: var(--sidebar-width);
   flex-shrink: 0;
 }
@@ -5229,7 +5243,6 @@ html, body {
   [class*="chart-wrap"],
   .recharts-responsive-container {
     overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
     max-width: 100%;
   }
 

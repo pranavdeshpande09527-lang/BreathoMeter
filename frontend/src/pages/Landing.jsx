@@ -176,8 +176,8 @@ export default function Landing() {
             <h1 className="lp-hero-title">
               Respiratory<br />
               monitoring<br />
-              <span className="lp-hero-accent">engineered for</span><br />
-              early detection.
+              <span className="lp-hero-accent">designed to promote</span><br />
+              early awareness
             </h1>
 
             {/* Phase 5: Empathy-first sub-headline */}

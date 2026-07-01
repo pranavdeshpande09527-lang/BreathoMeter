@@ -114,11 +114,11 @@ export default function Signup() {
           <div className="auth-name-row">
             <div className="form-group">
               <label className="form-label" htmlFor="fname">First name</label>
-              <input id="fname" name="fname" type="text" className="form-input" placeholder="Sarah" required disabled={loading} />
+              <input id="fname" name="fname" type="text" className="form-input" placeholder="Pranav" required disabled={loading} />
             </div>
             <div className="form-group">
               <label className="form-label" htmlFor="lname">Last name</label>
-              <input id="lname" name="lname" type="text" className="form-input" placeholder="Chen" required disabled={loading} />
+              <input id="lname" name="lname" type="text" className="form-input" placeholder="Deshpande" required disabled={loading} />
             </div>
           </div>
 
