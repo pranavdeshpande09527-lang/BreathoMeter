@@ -144,18 +144,24 @@ Breathometer 6.0 features a production-grade validation suite using **Playwright
 
 ```bash
 # Run Full UI Automation (Signup, Auth, 9-Step Assessment)
-python backend/frontend_e2e_ultra.py
+python backend/tests_automation/frontend_e2e_ultra.py
 
 # Run Clinical Logic Validator (Validates ML Ensemble accuracy)
-python backend/clinical_validator.py
+python backend/scripts/clinical_validator.py
 ```
-> Full documentation of test results is available at `backend/e2e_validation_report.md`.
+> Full documentation of test results is available at `backend/tests_automation/e2e_validation_report.md`.
 
 ## 🔐 Security & Compliance
 - **HIPAA Focused:** Architectural design complies with patient data portability and isolation standards.
 - **Military-Grade Encryption:** AES-256 for data at rest, TLS 1.3 for data in transit. 
 - **Row Level Security (RLS):** Stringent DB policies restrict data interactions securely to the authenticated JWT context.
 - **Medical Disclaimer:** Strict API-level disclaimers ensure AI reasoning does not substitute for certified clinical review or emergency services.
+
+---
+
+## 📖 Documentation
+
+- [ML Pipeline Architecture](docs/PIPELINE.md) — End-to-end ML inference pipeline breakdown
 
 ---
 
