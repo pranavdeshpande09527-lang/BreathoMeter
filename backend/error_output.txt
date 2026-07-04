@@ -1,2 +1,0 @@
-500
-{"detail":"An unexpected error occurred during signup."}

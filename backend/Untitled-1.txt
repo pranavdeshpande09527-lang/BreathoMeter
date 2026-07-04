@@ -1,3 +1,0 @@
-# 
-
-{"loaded":true,"error":null,"dataset_path":"backend/app/services/maharashtra_doctors_master.json","all_doctors_count":"441+"}
