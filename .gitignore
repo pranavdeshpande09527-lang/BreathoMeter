@@ -11,6 +11,8 @@ __pycache__/
 *.egg-info/
 venv/
 .venv/
+venv*/
+
 
 # ML artifacts
 *.pkl
@@ -49,4 +51,9 @@ push_error*.txt
 !package.json
 !deno.json*
 !frontend/public/manifest.json
-!frontend/public/icon-*.png
+!frontend/public/icon-*.png
+
+# Extra files to ignore
+*.xlsx
+temp/
+tmp/
