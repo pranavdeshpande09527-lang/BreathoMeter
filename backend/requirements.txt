@@ -7,17 +7,17 @@ python-dotenv
 requests
 httpx
 google-generativeai
-scikit-learn
-pandas
+scikit-learn==1.8.0  # PINNED: .pkl models trained on 1.8.0 — upgrading causes InconsistentVersionWarning and may silently break predictions
+pandas==2.2.3
 openpyxl
-numpy
+numpy==1.26.4
 python-multipart
 # AI / LLM
 groq
 # Rate limiting
 slowapi
-# ML pipeline
-joblib
+# ML pipeline — versions pinned to match training environment
+joblib==1.4.2
 catboost
 xgboost
 lightgbm
