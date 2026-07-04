@@ -19,21 +19,16 @@ from app.core.rate_limit import limiter
 router = APIRouter(prefix="/inference", tags=["Prediction Engine"])
 logger = logging.getLogger(__name__)
 
-# Fix unpickling for custom ensemble classes
+# Register custom ensemble classes for pickle unpickling.
+# The .pkl models were trained with these classes in __main__ scope (train_model.py
+# was run as a script). Registering them here ensures joblib.load() can resolve
+# OOFWeightedStacker and CustomEnsemble without needing train_model on sys.path.
+# Trained with: scikit-learn==1.8.0 — do not upgrade sklearn without retraining.
 import sys
-try:
-    import train_model
-    from app.ml_ensemble import CustomEnsemble
-    
-    # Map both names to the CustomEnsemble class in the __main__ module
-    sys.modules['__main__'].OOFWeightedStacker = CustomEnsemble
-    sys.modules['__main__'].CustomEnsemble = CustomEnsemble
-    
-    # Also ensure they are available in the train_model module if referenced there
-    train_model.OOFWeightedStacker = CustomEnsemble
-    train_model.CustomEnsemble = CustomEnsemble
-except Exception as e:
-    logging.warning(f"Could not setup unpickling aliases: {e}")
+from app.ml_ensemble import CustomEnsemble
+sys.modules['__main__'].OOFWeightedStacker = CustomEnsemble
+sys.modules['__main__'].CustomEnsemble = CustomEnsemble
+
 
 # Define MODELS_DIR
 MODELS_DIR = os.path.join(os.path.dirname(__file__), "..", "ml_models")
@@ -72,6 +67,29 @@ try:
         logger.warning("Environmental model assets missing - using fallback.")
 except Exception as e:
     logger.warning(f"Environmental models could not be loaded: {e}")
+
+# ── Startup self-test ────────────────────────────────────────────────────────
+# Runs a dummy prediction immediately after model load.
+# If unpickling or version issues break inference, this fails loudly at startup
+# rather than silently producing wrong results at request time.
+try:
+    if calibrated_model is not None and preprocessor is not None:
+        _dummy = pd.DataFrame([{
+            'AQI': 50, 'PM10': 20, 'PM2_5': 10, 'NO2': 15, 'SO2': 5,
+            'O3': 30, 'Temperature': 25, 'Humidity': 60, 'WindSpeed': 10,
+            'RespiratoryCases': 100, 'CardiovascularCases': 50,
+            'HospitalAdmissions': 30, 'HealthImpactScore': 40,
+            'PollutionIndex': 16, 'WeatherStress': 1500,
+            'PollutionHumidityInteraction': 600,
+        }])
+        _X = preprocessor.transform(_dummy)
+        if good_feat_idx:
+            _X = _X[:, good_feat_idx]
+        calibrated_model.predict_proba(_X)
+        logger.info("Model self-test: OK (environmental model loaded and responsive)")
+except Exception as _e:
+    logger.error(f"Model self-test FAILED — predictions may be broken: {_e}")
+# ────────────────────────────────────────────────────────────────────────────
 
 class EnvironmentalData(BaseModel):
     AQI: float
