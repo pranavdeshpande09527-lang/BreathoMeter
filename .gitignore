@@ -2,6 +2,7 @@
 .env
 api_key.env
 *.env.local
+*.env.production
 *-firebase-adminsdk-*.json
 
 # Python
@@ -11,6 +12,8 @@ __pycache__/
 *.egg-info/
 venv/
 .venv/
+venv*/
+
 
 # ML artifacts
 *.pkl
@@ -28,9 +31,9 @@ node_modules/
 
 # Logs and test output
 *.log
-test_out.txt
-test_results.txt
-final_report.txt
+*.txt
+!backend/requirements.txt
+!frontend/package-lock.json
 
 # Dataset files
 *.csv
@@ -39,14 +42,27 @@ final_report.txt
 .antigravity/
 push_error*.txt
 
+# Firebase deploy cache
+.firebase/
+frontend/.firebase/
+
 # Automation artifacts
 *.html
 *.png
 *.webp
 *.json
-!clinical_validation_results.json
+!backend/scripts/clinical_validation_results.json
 !firebase.json
 !package.json
 !deno.json*
 !frontend/public/manifest.json
-!frontend/public/icon-*.png
+!frontend/public/icon-*.png
+!backend/app/ml_models/*.json
+
+# Large data files
+maharashtra_doctors_master.json
+
+# Extra files to ignore
+*.xlsx
+temp/
+tmp/
