@@ -209,7 +209,7 @@ export default function Landing() {
           </div>
 
           {/* RIGHT — Live Air Quality Card */}
-          <div className="lp-hero-right">
+          <div className="lp-hero-right" style={{ marginTop: '80px' }}>
             <Suspense fallback={<div className="lp-monitor-panel lp-aqi-card" style={{minHeight: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0.5}}>Loading Air Quality Data…</div>}>
               <LandingAQICard />
             </Suspense>
