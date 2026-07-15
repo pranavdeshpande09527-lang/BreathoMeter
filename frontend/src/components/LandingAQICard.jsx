@@ -48,22 +48,16 @@ export default function LandingAQICard() {
     }
 
     async function resolveCity(lat, lon) {
-      // Use OpenMeteo reverse geocoding (no API key needed)
+      // BigDataCloud: free, no API key, no rate limit, designed for browser use
       try {
         const res = await fetch(
-          `https://geocoding-api.open-meteo.com/v1/search?name=${lat},${lon}&count=1&language=en&format=json`
+          `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`
         )
-        // Fallback: use Nominatim (OpenStreetMap) for reverse geocoding
-        const nmRes = await fetch(
-          `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&zoom=10`,
-          { headers: { 'Accept-Language': 'en' } }
-        )
-        const nmData = await nmRes.json()
-        return nmData?.address?.city
-          || nmData?.address?.town
-          || nmData?.address?.village
-          || nmData?.address?.state_district
-          || nmData?.address?.state
+        const data = await res.json()
+        // Returns city > locality > principalSubdivision in order of preference
+        return data?.city
+          || data?.locality
+          || data?.principalSubdivision
           || 'Your Location'
       } catch {
         return 'Your Location'
