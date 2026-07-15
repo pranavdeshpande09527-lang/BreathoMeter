@@ -173,8 +173,8 @@ export default function Landing() {
             </div>
 
 
-            <h1 className="lp-hero-title" style={{ fontFamily: "'Oswald', sans-serif", fontWeight: 600, letterSpacing: '0.02em' }}>
-              breathOmeter
+            <h1 className="lp-hero-title" style={{ fontFamily: "'Oswald', sans-serif", fontWeight: 600, letterSpacing: '0.08em', lineHeight: 1.1 }}>
+              Breathometer
             </h1>
 
             {/* Phase 5: Empathy-first sub-headline */}
