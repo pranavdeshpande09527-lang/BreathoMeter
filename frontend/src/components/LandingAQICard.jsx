@@ -29,22 +29,15 @@ export default function LandingAQICard() {
 
   useEffect(() => {
     let cancelled = false
-    
-    // Defer the API call to avoid blocking the main thread during initial paint/hydration
-    const timer = setTimeout(async () => {
-      try {
-        const ipRes  = await fetch('https://ipinfo.io/json')
-        const ipData = await ipRes.json()
-        if (cancelled) return
-        const city = ipData.city || 'Your Location'
-        const [lat, lon] = (ipData.loc || '20.5937,78.9629').split(',')
-        setAqiCity(city)
 
+    async function fetchAqiForCoords(lat, lon, cityName) {
+      try {
         const aqiRes = await fetch(
           `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=us_aqi,pm10,pm2_5,carbon_monoxide,nitrogen_dioxide,ozone,uv_index`
         )
         const data = await aqiRes.json()
         if (cancelled) return
+        setAqiCity(cityName)
         setAqiData(data.current)
         setAqiTime(new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' }))
       } catch {
@@ -52,9 +45,75 @@ export default function LandingAQICard() {
       } finally {
         if (!cancelled) setAqiLoading(false)
       }
+    }
+
+    async function resolveCity(lat, lon) {
+      // Use OpenMeteo reverse geocoding (no API key needed)
+      try {
+        const res = await fetch(
+          `https://geocoding-api.open-meteo.com/v1/search?name=${lat},${lon}&count=1&language=en&format=json`
+        )
+        // Fallback: use Nominatim (OpenStreetMap) for reverse geocoding
+        const nmRes = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&zoom=10`,
+          { headers: { 'Accept-Language': 'en' } }
+        )
+        const nmData = await nmRes.json()
+        return nmData?.address?.city
+          || nmData?.address?.town
+          || nmData?.address?.village
+          || nmData?.address?.state_district
+          || nmData?.address?.state
+          || 'Your Location'
+      } catch {
+        return 'Your Location'
+      }
+    }
+
+    // Defer so the hero paints first
+    const timer = setTimeout(async () => {
+      if (cancelled) return
+
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          async (pos) => {
+            if (cancelled) return
+            const { latitude: lat, longitude: lon } = pos.coords
+            const city = await resolveCity(lat, lon)
+            if (!cancelled) await fetchAqiForCoords(lat, lon, city)
+          },
+          async () => {
+            // GPS denied — fall back to IP-based
+            if (cancelled) return
+            try {
+              const ipRes  = await fetch('https://ipinfo.io/json')
+              const ipData = await ipRes.json()
+              if (cancelled) return
+              const city = ipData.city || 'Your Location'
+              const [lat, lon] = (ipData.loc || '20.5937,78.9629').split(',')
+              await fetchAqiForCoords(lat, lon, city)
+            } catch {
+              if (!cancelled) { setAqiError(true); setAqiLoading(false) }
+            }
+          },
+          { enableHighAccuracy: true, timeout: 8000 }
+        )
+      } else {
+        // No geolocation support — use IP fallback
+        try {
+          const ipRes  = await fetch('https://ipinfo.io/json')
+          const ipData = await ipRes.json()
+          if (cancelled) return
+          const city = ipData.city || 'Your Location'
+          const [lat, lon] = (ipData.loc || '20.5937,78.9629').split(',')
+          await fetchAqiForCoords(lat, lon, city)
+        } catch {
+          if (!cancelled) { setAqiError(true); setAqiLoading(false) }
+        }
+      }
     }, 600) // Delay so hero paints first
 
-    return () => { 
+    return () => {
       cancelled = true
       clearTimeout(timer)
     }

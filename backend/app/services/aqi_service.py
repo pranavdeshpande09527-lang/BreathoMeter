@@ -33,7 +33,7 @@ class AQIService:
                 # Format: geo:lat;lon
                 coords = location.replace("geo:", "").split(";")
                 lat, lon = float(coords[0]), float(coords[1])
-                location_name = f"Lat: {lat}, Lon: {lon}"
+                location_name = None  # will be resolved below via reverse geocoding
             else:
                 # Use WAQI to resolve city name or "here" to coordinates
                 async with httpx.AsyncClient(timeout=10.0) as client:
@@ -99,19 +99,22 @@ class AQIService:
                             geo_data = geo_resp.json()
                             if geo_data and isinstance(geo_data, list) and len(geo_data) > 0:
                                 resolved_name = geo_data[0].get("name")
-                                # Include state/country for clarity if available
                                 state = geo_data[0].get("state")
-                                country = geo_data[0].get("country")
                                 if resolved_name:
                                     location_name = f"{resolved_name}"
                                     if state: location_name += f", {state}"
                                     logger.info(f"Resolved geo-location to: {location_name}")
-                        
-                        # Priority 2: Fallback to weather station name
-                        if location_name.startswith("Lat:") and w_data.get("name"):
-                            location_name = w_data["name"]
                     except Exception as geo_err:
                         logger.warning(f"Geocoding resolution failed: {geo_err}")
+
+                    # Priority 2: Fallback to weather station name from OWM
+                    if not location_name and w_data.get("name"):
+                        location_name = w_data["name"]
+                        logger.info(f"Resolved location via weather station: {location_name}")
+
+                    # Priority 3: Final fallback — never show raw coordinates
+                    if not location_name:
+                        location_name = "Nearby Location"
                 
                 weather_list = w_data.get("weather", [])
                 weather_desc = weather_list[0].get("description") if weather_list else None
