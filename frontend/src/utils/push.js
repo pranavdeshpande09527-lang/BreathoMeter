@@ -2,7 +2,10 @@ import { getMessaging, getToken, onMessage } from "firebase/messaging";
 import { api } from "./api";
 import { app, firebaseConfig } from "./firebase";
 
-const VAPID_KEY = import.meta.env.VITE_FIREBASE_VAPID_KEY || "BCfM-iZvqP3kNx4bbNksTc9mBKqp5iq2CEnGHMmRfbZgJuYSUsyPFWH68o0oQoHKi_-oVIB1dyNW2CfXRrs33Y0";
+const VAPID_KEY = import.meta.env.VITE_FIREBASE_VAPID_KEY;
+if (!VAPID_KEY) {
+  console.error("[Push] VITE_FIREBASE_VAPID_KEY is not set — push notifications will be disabled.");
+}
 
 export const initPushNotifications = async () => {
   try {

@@ -50,7 +50,7 @@ async def post_message(request: Request, appointment_id: str, msg: AppointmentMe
         raise
     except Exception as e:
         app_logger.error(f"Failed to post message to {appointment_id}: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Failed to send message.")
 
 @router.get("/message/{appointment_id}")
 async def get_messages(appointment_id: str, user = Depends(get_current_user)):
@@ -61,7 +61,7 @@ async def get_messages(appointment_id: str, user = Depends(get_current_user)):
         raise
     except Exception as e:
         app_logger.error(f"Failed to get messages for {appointment_id}: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Failed to retrieve messages.")
 
 @router.post("/request")
 @limiter.limit("10/minute")
@@ -105,7 +105,7 @@ async def request_appointment(request: Request, req: AppointmentRequest, user = 
         raise
     except Exception as e:
         app_logger.error(f"Failed to request appointment: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Failed to request appointment.")
 
 @router.get("/doctor")
 async def get_doctor_appointments(user = Depends(require_role(["doctor"]))):
@@ -117,7 +117,7 @@ async def get_doctor_appointments(user = Depends(require_role(["doctor"]))):
         return {"appointments": res or []}
     except Exception as e:
         app_logger.error(f"Failed to fetch doctor appointments: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Failed to retrieve appointments.")
 
 @router.get("/patient")
 async def get_patient_appointments(user = Depends(get_current_user)):
@@ -151,7 +151,7 @@ async def get_patient_appointments(user = Depends(get_current_user)):
         return {"appointments": patient_apps}
     except Exception as e:
         app_logger.error(f"Failed to fetch patient appointments: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Failed to retrieve appointments.")
 
 @router.post("/accept/{appointment_id}")
 async def accept_appointment(appointment_id: str, user = Depends(require_role(["doctor"]))):
@@ -165,4 +165,4 @@ async def accept_appointment(appointment_id: str, user = Depends(require_role(["
         return {"message": "Appointment accepted"}
     except Exception as e:
         app_logger.error(f"Failed to accept appointment {appointment_id}: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Failed to accept appointment.")

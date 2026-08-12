@@ -106,10 +106,43 @@ class EnvironmentalData(BaseModel):
     HospitalAdmissions: float
     HealthImpactScore: float
     model_config = ConfigDict(extra="forbid")
-    
+
+
+class LifestyleData(BaseModel):
+    """Validated lifestyle data fields to prevent prompt injection."""
+    smoking_habits: Optional[str] = Field(None, max_length=50)
+    alcohol_use: Optional[str] = Field(None, max_length=50)
+    exercise_frequency: Optional[str] = Field(None, max_length=50)
+    model_config = ConfigDict(extra="ignore")  # ignore unknown — backwards compat
+
+
+class VitalsInput(BaseModel):
+    """Validated patient vitals to prevent prompt injection."""
+    spo2: Optional[float] = Field(None, ge=0, le=100)
+    inhale_capacity: Optional[float] = Field(None, ge=0, le=30)
+    exhale_capacity: Optional[float] = Field(None, ge=0, le=30)
+    breath_hold_time: Optional[float] = Field(None, ge=0, le=600)
+    cough_severity: Optional[int] = Field(None, ge=0, le=10)
+    stairs_difficulty: Optional[str] = Field(None, max_length=60)
+    model_config = ConfigDict(extra="ignore")  # ignore unknown — backwards compat
+
+
+class PatientData(BaseModel):
+    """Typed patient payload — replaces the former untyped dict to block prompt injection."""
+    age: Optional[int] = Field(None, ge=0, le=150)
+    gender: Optional[str] = Field(None, max_length=20)
+    bmi: Optional[float] = Field(None, ge=0, le=100)
+    symptoms: Optional[List[str]] = Field(default_factory=list)
+    vitals: Optional[VitalsInput] = None
+    lifestyle: Optional[LifestyleData] = None
+    city: Optional[str] = Field(None, max_length=80)
+    location: Optional[str] = Field(None, max_length=80)
+    model_config = ConfigDict(extra="ignore")  # ignore unknown — backwards compat
+
+
 class PredictionRequest(BaseModel):
     environmental_data: EnvironmentalData
-    optional_patient_data: Optional[dict] = {}
+    optional_patient_data: Optional[PatientData] = None
     model_config = ConfigDict(extra="forbid")
 
 def apply_feature_engineering(df):
@@ -128,12 +161,14 @@ def _to_float(value, default=0.0):
 
 @router.post("/predict")
 @limiter.limit("5/minute")
-async def get_risk_prediction(request: Request, environmental_data: EnvironmentalData, optional_patient_data: Optional[dict] = None, user = Depends(get_current_user), expand: bool = False):
+async def get_risk_prediction(request: Request, environmental_data: EnvironmentalData, optional_patient_data: Optional[PatientData] = None, user = Depends(get_current_user), expand: bool = False):
     """
     Enhanced Hybrid Inference: Environmental + Clinical ML + AI Reasoning.
     Includes input quality scoring, insufficient-data detection, validity scoring, and confidence banding.
     """
-    patient_data = optional_patient_data or {}
+    # Convert validated Pydantic model to plain dict for downstream processing.
+    # extra="ignore" on PatientData means any unknown/malicious keys were silently dropped at parse time.
+    patient_data = optional_patient_data.model_dump(exclude_none=True) if optional_patient_data else {}
     env_dict = environmental_data.model_dump()
     vitals = patient_data.get('vitals', {})
     inhale_capacity = _to_float(vitals.get('inhale_capacity'))

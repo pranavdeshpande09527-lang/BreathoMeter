@@ -19,13 +19,19 @@ class PushService:
 
         try:
             # 1. Check for Secret File (most stable)
-            creds_path = os.getenv("FIREBASE_SERVICE_ACCOUNT_PATH", "firebase-service-account.json")
-            if os.path.exists(creds_path):
-                logger.info(f"Initializing Firebase Admin SDK from file: {creds_path}")
-                cred = credentials.Certificate(creds_path)
-                firebase_admin.initialize_app(cred)
-                self._initialized = True
-                return
+            candidate_paths = [
+                os.getenv("FIREBASE_SERVICE_ACCOUNT_PATH"),
+                "breathometer6-firebase-adminsdk.json",
+                r"D:\breathometer\breathometer6-firebase-adminsdk-fbsvc-9eb1172650.json",
+                "firebase-service-account.json",
+            ]
+            for creds_path in candidate_paths:
+                if creds_path and os.path.exists(creds_path):
+                    logger.info(f"Initializing Firebase Admin SDK from file: {creds_path}")
+                    cred = credentials.Certificate(creds_path)
+                    firebase_admin.initialize_app(cred)
+                    self._initialized = True
+                    return
 
             # 2. Fallback to Environment Variable
             creds_json = os.getenv("FIREBASE_SERVICE_ACCOUNT_JSON")

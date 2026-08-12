@@ -69,7 +69,7 @@ async def submit_feedback(request: Request, data: FeedbackRequest, user=Depends(
         raise
     except Exception as e:
         logger.error(f"Error saving feedback: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Failed to save feedback. Please try again.")
 
 
 @router.post("/doctor-click")
@@ -110,7 +110,7 @@ async def log_doctor_click(
         return {"success": True}
     except Exception as e:
         logger.error(f"Error logging doctor click: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Failed to log doctor click.")
 
 
 @router.get("/history/{prediction_id}")
@@ -125,4 +125,5 @@ async def get_feedback(prediction_id: str, user=Depends(get_current_user)):
         )
         return res[0] if isinstance(res, list) and res else {}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Error retrieving feedback: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Failed to retrieve feedback.")

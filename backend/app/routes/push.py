@@ -46,7 +46,7 @@ async def register_push_token(
 
     except Exception as e:
         logger.error(f"Error registering push token: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Failed to register push token.")
 
 @router.post("/unregister")
 async def unregister_push_token(
@@ -66,4 +66,4 @@ async def unregister_push_token(
         return {"success": True}
     except Exception as e:
         logger.error(f"Error unregistering push token: {e}")
-        return {"success": False, "error": str(e)}
+        return {"success": False, "error": "Failed to unregister push token."}

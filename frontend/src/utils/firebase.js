@@ -1,15 +1,17 @@
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 
-// User provided configuration from Firebase Console
+// Firebase config is read from VITE_ environment variables.
+// Set these in frontend/.env.local (dev) or your Firebase Hosting / CI environment (prod).
+// See .env.example for the full list of required keys.
 const firebaseConfig = {
-  apiKey: "AIzaSyD6yhngorYwZpdGVgIwY8KFodsxTG55r-U",
-  authDomain: "breathometer6.firebaseapp.com",
-  projectId: "breathometer6",
-  storageBucket: "breathometer6.firebasestorage.app",
-  messagingSenderId: "124093463358",
-  appId: "1:124093463358:web:df84c2cf31506bbf144a6f",
-  measurementId: "G-SYLYY7MDXE"
+  apiKey:            import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain:        import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId:         import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket:     import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId:             import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId:     import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
 // Initialize Firebase

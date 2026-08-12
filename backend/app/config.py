@@ -22,6 +22,11 @@ class Settings(BaseSettings):
     smtp_password: Optional[str] = None
     smtp_from_email: Optional[str] = None
 
+    # Rate limiting thresholds (requests per window — tune via env vars, no redeploy needed)
+    rate_limit_signup: int = 5           # per 60 seconds per IP
+    rate_limit_login: int = 10           # per 60 seconds per IP
+    rate_limit_forgot_password: int = 3  # per 60 seconds per IP
+
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 settings = Settings()

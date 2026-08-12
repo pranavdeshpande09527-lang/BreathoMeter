@@ -86,9 +86,14 @@ async def lifespan(app: FastAPI):
     """Manage startup/shutdown of shared resources (DB connection pools)."""
     _audit_environment()          # ← Logs env var status
     await init_db_clients()       # Open persistent HTTP pools on startup
-    
-    # Warm-up the database connection with retries (helps with network/DNS startup lag or paused DBs)
+
+    # Start background maintenance tasks
     import asyncio
+    from app.utils.rate_limit import start_rate_limit_pruner
+    pruner_task = asyncio.create_task(start_rate_limit_pruner())
+    logger.info("Rate-limit pruner task started.")
+
+    # Warm-up the database connection with retries (helps with network/DNS startup lag or paused DBs)
     max_retries = 3
     for attempt in range(1, max_retries + 1):
         try:
@@ -102,9 +107,17 @@ async def lifespan(app: FastAPI):
             else:
                 logger.info(f"Database warm-up attempt {attempt} failed ({e}). Retrying in 3s...")
                 await asyncio.sleep(3)
-        
+
     yield
+
+    # Graceful shutdown
+    pruner_task.cancel()
+    try:
+        await pruner_task
+    except asyncio.CancelledError:
+        pass
     await close_db_clients()      # Gracefully drain pools on shutdown
+
 
 
 app = FastAPI(
@@ -236,7 +249,7 @@ async def system_status():
         await supabase_request("health_data", "GET", query_params={"limit": "1"})
         status["database"] = "ok"
     except Exception as e:
-        status["database"] = f"error: {str(e)[:100]}"
+        status["database"] = "error"
         logger.warning(f"System status: DB check failed: {e}")
     
     # Check ML models loaded

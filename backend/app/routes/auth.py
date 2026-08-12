@@ -10,7 +10,7 @@ from app.database import supabase_auth_request, supabase_admin_auth_request, sup
 from app.config import settings
 from app.core.security import ensure_doctor_patient_access, get_doctor_patient_ids, redact_value, sanitize_free_text
 from app.utils.logger import app_logger
-from app.utils.rate_limit import check_rate_limit
+from app.utils.rate_limit import check_rate_limit, check_account_lockout, record_failed_login, clear_failed_logins
 from app.utils.email import send_verification_email
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
@@ -31,7 +31,7 @@ async def signup(user: UserCreate, request: Request):
     Limits: 5 requests per minute per IP.
     """
     # 1. Backend Rate Limiting (Sliding Window)
-    await check_rate_limit(request, limit=5, window_seconds=60)
+    await check_rate_limit(request, limit=settings.rate_limit_signup, window_seconds=60)
     
     # 2. Security Validations
     role = user.role.lower() if user.role else "patient"
@@ -80,7 +80,7 @@ async def signup(user: UserCreate, request: Request):
                 raise HTTPException(status_code=400, detail="Username already registered.")
             if "rate limit" in error_msg:
                 raise HTTPException(status_code=429, detail="Signup rate limit exceeded. Please try again later.")
-            raise HTTPException(status_code=500, detail=f"Account creation failed: {str(e)}")
+            raise HTTPException(status_code=500, detail="Account creation failed. Please try again.")
 
         # ── Step 2: Attempt to log in immediately ─────────────────────────────
         # Works when Supabase "Confirm email" is DISABLED (preferred for username-based apps).
@@ -123,7 +123,7 @@ async def signup(user: UserCreate, request: Request):
                         detail="Account created but login failed. Email confirmation is enabled in Supabase — please disable it in the Supabase Auth dashboard."
                     )
             else:
-                raise HTTPException(status_code=500, detail=f"Login after signup failed: {str(login_err)}")
+                raise HTTPException(status_code=500, detail="Login after signup failed. Please try logging in manually.")
 
         # ── Step 3: Insert into public tables using the user's own JWT ────────
         user_obj = login_resp.get("user")
@@ -189,18 +189,23 @@ async def signup(user: UserCreate, request: Request):
         raise
     except Exception as e:
         app_logger.error(f"[SIGNUP] Unhandled error for {user.username}: {str(e)}\n{traceback.format_exc()}")
-        raise HTTPException(status_code=500, detail=f"Signup failed: {str(e)}")
+        raise HTTPException(status_code=500, detail="Signup failed. Please try again.")
 
 @router.post("/login")
 async def login(user: UserLogin, request: Request):
     """Handles user login with standard Supabase Auth."""
-    await check_rate_limit(request, limit=10, window_seconds=60)
+    # IP-based rate limit
+    await check_rate_limit(request, limit=settings.rate_limit_login, window_seconds=60)
+    # Per-account backoff: adds delay after 3+ failures, locks after 10 within 15 min
+    await check_account_lockout(user.username)
     pseudo_email = f"{user.username}@breathometer.local"
     try:
         response = await supabase_auth_request("token?grant_type=password", "POST", {
             "email": pseudo_email,
             "password": user.password
         })
+        # Successful login — reset the per-account failure counter
+        await clear_failed_logins(user.username)
         
         user_obj = response.get("user", {})
         if user_obj:
@@ -233,6 +238,8 @@ async def login(user: UserLogin, request: Request):
         }
     except Exception as e:
         error_msg = str(e)
+        # Record failure for per-account backoff tracking
+        await record_failed_login(user.username)
         if "Email not confirmed" in error_msg:
             raise HTTPException(
                 status_code=403,
@@ -288,7 +295,7 @@ async def forgot_password(req: ForgotPasswordRequest, request: Request):
     Triggers a password-reset email via Supabase Admin API.
     Always returns 200 to prevent email enumeration attacks.
     """
-    await check_rate_limit(request, limit=3, window_seconds=60)
+    await check_rate_limit(request, limit=settings.rate_limit_forgot_password, window_seconds=60)
     try:
         email = req.email.strip().lower()
         # Use the Supabase Admin auth endpoint to generate a recovery link
@@ -422,7 +429,7 @@ async def update_profile(data: ProfileUpdate, user=Depends(get_current_user)):
 
     except Exception as e:
         app_logger.error(f"Failed to save health_profiles for user {user.id}: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to save profile data: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to save profile data. Please try again.")
 
     return {
         "message": "Profile updated successfully",
@@ -472,7 +479,7 @@ async def list_doctors(user=Depends(get_current_user)):
     except Exception as e:
         from app.utils.logger import app_logger
         app_logger.error(f"Failed to list doctors: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Could not retrieve doctor list: {str(e)}")
+        raise HTTPException(status_code=500, detail="Could not retrieve doctor list. Please try again.")
 
 
 @router.get("/patients")

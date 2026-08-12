@@ -34,7 +34,7 @@ async def submit_health_data(request: Request, data: HealthDataCreate, user=Depe
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Failed to save health data. Please try again.")
 
 
 @router.get("/latest")
@@ -50,4 +50,4 @@ async def get_latest_health_data(user=Depends(get_current_user)):
             return {"message": "No health data found", "data": None}
         return {"data": response[0]}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Failed to retrieve health data. Please try again.")
