@@ -14,6 +14,16 @@ jobs:
       - name: Build Frontend
         run: npm run build
         working-directory: frontend
+        env:
+          VITE_API_BASE_URL: https://breathometer6-0-4ago.onrender.com
+          VITE_FIREBASE_API_KEY: AIzaSyD6yhngorYwZpdGVgIwY8KFodsxTG55r-U
+          VITE_FIREBASE_AUTH_DOMAIN: breathometer6.firebaseapp.com
+          VITE_FIREBASE_PROJECT_ID: breathometer6
+          VITE_FIREBASE_STORAGE_BUCKET: breathometer6.firebasestorage.app
+          VITE_FIREBASE_MESSAGING_SENDER_ID: "124093463358"
+          VITE_FIREBASE_APP_ID: 1:124093463358:web:df84c2cf31506bbf144a6f
+          VITE_FIREBASE_MEASUREMENT_ID: G-SYLYY7MDXE
+          VITE_FIREBASE_VAPID_KEY: BCfM-iZvqP3kNx4bbNksTc9mBKqp5iq2CEnGHMmRfbZgJuYSUsyPFWH68o0oQoHKi_-oVIB1dyNW2CfXRrs33Y0
       - name: Deploy to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
