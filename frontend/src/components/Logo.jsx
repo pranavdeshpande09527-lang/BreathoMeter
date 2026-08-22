@@ -109,11 +109,11 @@ const Logo = ({ size, height, width, className = '', iconOnly = false, hideIcon 
             style={{
               margin: 0,
               padding: 0,
-              fontSize: `48px`,
-              fontWeight: '900',
+              fontSize: `50px`,
+              fontWeight: '600',
               lineHeight: '1',
-              fontFamily: "'Inter', system-ui, sans-serif",
-              letterSpacing: `-2px`,
+              fontFamily: "'Oswald', sans-serif",
+              letterSpacing: `0.04em`,
               position: 'relative'
             }}
           >
@@ -125,9 +125,9 @@ const Logo = ({ size, height, width, className = '', iconOnly = false, hideIcon 
             style={{
               margin: `2px 0 0 2px`,
               padding: 0,
-              fontSize: `13px`,
-              fontWeight: '800',
-              letterSpacing: `3.5px`,
+              fontSize: `12px`,
+              fontWeight: '700',
+              letterSpacing: `3px`,
               fontFamily: "'Inter', sans-serif",
               textTransform: 'uppercase',
               position: 'relative',
