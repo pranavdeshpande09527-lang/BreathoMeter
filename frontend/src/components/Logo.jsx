@@ -1,5 +1,5 @@
 import React from 'react';
-import brandSymbol from '../assets/brand_symbol.png';
+const brandSymbol = '/icon-192x192.png';
 
 /**
  * Breathometer Text & Image Premium Identity
