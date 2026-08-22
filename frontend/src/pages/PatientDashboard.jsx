@@ -247,11 +247,6 @@ export default function PatientDashboard() {
                             {generateHeroHook({ aqi: currentAqi, healthScore: healthScore, riskLevel: riskLevel })}
                         </div>
                     </div>
-                    <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
-                        <div className="pd-header-logo-box glass-secondary" style={{ padding: '4px 12px', borderRadius: 'var(--radius-full)', border: '1px solid rgba(255,255,255,0.3)', display: 'flex', alignItems: 'center' }}>
-                            <Logo size={28} iconOnly={true} />
-                        </div>
-                    </div>
                 </div>
             </header>
             {/* ── Intelligence Layer: Narrator & Doctor Match ───────────────── */}

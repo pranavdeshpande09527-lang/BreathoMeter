@@ -5,13 +5,46 @@ import brandSymbol from '../assets/brand_symbol.png';
  * Breathometer Text & Image Premium Identity
  * Precision-coded typography + symbol, highly interactive and stylish lockup.
  */
-const Logo = ({ size, height, width, className = '', iconOnly = false }) => {
+const Logo = ({ size, height, width, className = '', iconOnly = false, hideIcon = false, showIcon = true }) => {
+  const shouldShowIcon = showIcon && !hideIcon;
   // Determine actual pixel height for proportion scaling to prevent overflow
   const requestedHeight = parseInt(height || size || '80', 10); 
   const scale = requestedHeight / 80;
 
-  // The base layout width of the logo lockup at 80px height is ~460px to fit 'Breathometer'
-  const baseWidth = 460;
+  if (iconOnly) {
+    return (
+      <div 
+        className={`logo-icon-only ${className}`}
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: `${requestedHeight}px`,
+          width: `${requestedHeight}px`,
+          pointerEvents: 'auto',
+          userSelect: 'none',
+          position: 'relative'
+        }}
+      >
+        <img
+          src={brandSymbol}
+          alt="Symbol"
+          className="brand-symbol-img brand-symbol-icon-only"
+          style={{
+            width: '100%', 
+            height: '100%',
+            objectFit: 'contain',
+            borderRadius: `${10 * scale}px`,
+            filter: 'drop-shadow(0 6px 16px rgba(37, 99, 235, 0.25))',
+            transition: 'transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275), filter 0.4s ease'
+          }}
+        />
+      </div>
+    );
+  }
+
+  // The base layout width of the logo lockup at 80px height is ~460px with icon, ~376px text-only
+  const baseWidth = shouldShowIcon ? 460 : 376;
   const scaledWidth = baseWidth * scale;
 
   return (
@@ -31,7 +64,7 @@ const Logo = ({ size, height, width, className = '', iconOnly = false }) => {
       <div style={{
           display: 'flex',
           alignItems: 'center',
-          gap: `16px`,
+          gap: shouldShowIcon ? `16px` : `0px`,
           height: `80px`,
           width: `${baseWidth}px`,
           transform: `scale(${scale})`,
@@ -40,32 +73,34 @@ const Logo = ({ size, height, width, className = '', iconOnly = false }) => {
           borderRadius: `14px`
       }}>
         {/* 1. LUXURY 3D SYMBOL */}
-        <div 
-          className="brand-symbol-wrapper"
-          style={{
-            height: `68px`, // 85% of 80px
-            width: `68px`,
-            minWidth: `68px`,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            position: 'relative'
-          }}
-        >
-          <img
-            src={brandSymbol}
-            alt="Symbol"
-            className="brand-symbol-img"
+        {shouldShowIcon && (
+          <div 
+            className="brand-symbol-wrapper"
             style={{
-              width: '100%', 
-              height: '100%',
-              objectFit: 'contain',
-              borderRadius: `10px`,
-              filter: 'drop-shadow(0 6px 16px rgba(37, 99, 235, 0.25))',
-              transition: 'transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275), filter 0.4s ease'
+              height: `68px`, // 85% of 80px
+              width: `68px`,
+              minWidth: `68px`,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              position: 'relative'
             }}
-          />
-        </div>
+          >
+            <img
+              src={brandSymbol}
+              alt="Symbol"
+              className="brand-symbol-img"
+              style={{
+                width: '100%', 
+                height: '100%',
+                objectFit: 'contain',
+                borderRadius: `10px`,
+                filter: 'drop-shadow(0 6px 16px rgba(37, 99, 235, 0.25))',
+                transition: 'transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275), filter 0.4s ease'
+              }}
+            />
+          </div>
+        )}
 
         {/* 2. PRECISION VECTOR TYPOGRAPHY */}
         <div className="logo-text-container" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>

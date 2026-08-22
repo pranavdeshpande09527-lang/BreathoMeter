@@ -126,7 +126,7 @@ export default function Landing() {
       <nav className="lp-nav">
         <div className="lp-nav-inner">
           <div className="lp-logo">
-            <Logo height={38} width="auto" />
+            <Logo height={38} width="auto" hideIcon />
           </div>
           <div className="lp-nav-links">
             <a href="#capabilities" className="lp-nav-link">Capabilities</a>
